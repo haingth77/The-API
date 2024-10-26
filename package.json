@@ -13,6 +13,8 @@
   },
   "dependencies": {
     "dotenv": "^16.4.5",
+    "json-schema-library": "^10.0.0-rc2",
+    "jsonschema": "^1.4.1",
     "the-api": "file:"
   }
 }

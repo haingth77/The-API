@@ -7,7 +7,6 @@ dotenv.config({
 
 export function getENV() {
     let env = process.env.ENV
-    console.log("env is:::::: ", env)
     if (!env) {env = ENV}
     return env
 }
@@ -21,7 +20,6 @@ export function getDataByEnv() {
     let env :string = getENV()
     switch(env) {
         case Env.SIT: 
-            console.log("env is SIT")
             return {
                 url: SIT_URL
         };
