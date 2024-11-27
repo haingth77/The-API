@@ -88,12 +88,31 @@ export class Verifications {
 
     }
 
-    public async verifyElementIsSorted (actual: any[]) {
-        let result : boolean = false
-        console.log(`Verify that is the array sorted: ${actual}`)
-        for (let index = 1; index < actual.length; index++) {
-            result = actual[index] > actual[index-1]? true : false
-            if (result == false) {break}
+    public async verifyElementIsSorted (actual: any[], order: string): Promise<void> {
+        let result : boolean = true
+        console.log(`Verify that is the array ${actual} sorted: ${order}`)
+
+        result = actual.length < 2 ? true : false
+
+        if (order == "ASC") {
+            console.log("ASC")
+            for (let index = 1; index < actual.length; index++) {
+                if (actual[index] < actual[index-1]) {
+                    result = false
+                    console.log("failed at: ", actual[index])
+                    break
+                }
+            }
+        }
+        else if (order == "DESC") {
+            console.log("DESC")
+            for (let index = 1; index < actual.length; index++) {
+                if (result = actual[index] > actual[index-1]) {result = false}
+                if (result == false) {break}
+            }
+        } else {
+            console.log("RANDOM")
+            result = false
         }
         expect(await result).toBe(true)
     }
