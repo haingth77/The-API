@@ -1,16 +1,15 @@
-import { test } from "@playwright/test"
-import SearchImage from "../api/services/search.image"
-import verifications, { Verifications } from "../api/utils/verifications"
-import utilServices from "../api/utils/util.services"
-import { SEARCH_IMAGE } from "../api/utils/enum"
-import { ImageSearchSchema } from "../api/schema/image.search.schema"
-import { json } from "stream/consumers"
+import ImageSearch from "@services/image.search"
+import verifications, { Verifications } from "@utils/verifications"
+import utilServices from "@utils/util.services"
+import { ImageSearchSchema } from "@schema/image.search.schema"
+import { Type_Image } from "@utils/source"
+import test from "@playwright/test"
 
 let limit_min : number = 1
 let limit_max : number = 100
 let limit_equivalent : number = 50
-let positiveresponseeCode : number = 200
-let negativeresponseeCode : number = 400
+let positiveresponseCode : number = 200
+let negativeresponseCode : number = 400
 
 interface DataDriven_Limit {
     id: number;
@@ -18,19 +17,19 @@ interface DataDriven_Limit {
         limit: number | string;
     };
     response: {
-        responsee_code: number;
-        responsee_length: number;
+        response_code: number;
+        response_length: number;
     };
 }
 
 interface DataDriven_Order {
     id: number;
     request: {
-        order: string;
+        order: "ASC" | "DESC" | "RANDOM" | string;
     };
     response: {
-        responsee_code: number;
-        responsee_isOrder: boolean;
+        response_code: number;
+        response_isOrder: boolean;
     };
 }
 
@@ -41,8 +40,8 @@ let dataSet_limit: DataDriven_Limit[] = [
             limit: limit_min -1
         },
         response: {
-            responsee_code: positiveresponseeCode,
-            responsee_length: limit_min
+            response_code: positiveresponseCode,
+            response_length: limit_min
         }
     },
     {
@@ -51,8 +50,8 @@ let dataSet_limit: DataDriven_Limit[] = [
             limit: limit_min
         },
         response: {
-            responsee_code: positiveresponseeCode,
-            responsee_length: limit_min
+            response_code: positiveresponseCode,
+            response_length: limit_min
         }
     },
     {
@@ -61,8 +60,8 @@ let dataSet_limit: DataDriven_Limit[] = [
             limit: limit_equivalent
         },
         response: {
-            responsee_code: positiveresponseeCode,
-            responsee_length: limit_equivalent
+            response_code: positiveresponseCode,
+            response_length: limit_equivalent
         }
     },
     {
@@ -71,8 +70,8 @@ let dataSet_limit: DataDriven_Limit[] = [
             limit: limit_max
         },
         response: {
-            responsee_code: positiveresponseeCode,
-            responsee_length: limit_max
+            response_code: positiveresponseCode,
+            response_length: limit_max
         }
     },
     {
@@ -81,8 +80,8 @@ let dataSet_limit: DataDriven_Limit[] = [
             limit: limit_max + 1
         },
         response: {
-            responsee_code: positiveresponseeCode,
-            responsee_length: limit_max
+            response_code: positiveresponseCode,
+            response_length: limit_max
         }
     },
     {   id: 6,
@@ -90,8 +89,8 @@ let dataSet_limit: DataDriven_Limit[] = [
             limit: "abc"
         },
         response: {
-            responsee_code: positiveresponseeCode,
-            responsee_length: limit_min
+            response_code: positiveresponseCode,
+            response_length: limit_min
         }
     }
 ]
@@ -103,8 +102,8 @@ let dataSet_order: DataDriven_Order[] = [
             order: "RANDOM"
         },
         response: {
-            responsee_code: positiveresponseeCode,
-            responsee_isOrder: false
+            response_code: positiveresponseCode,
+            response_isOrder: false
         }
     },
     {
@@ -113,8 +112,8 @@ let dataSet_order: DataDriven_Order[] = [
             order: "ASC"
         },
         response: {
-            responsee_code: positiveresponseeCode,
-            responsee_isOrder: true
+            response_code: positiveresponseCode,
+            response_isOrder: true
         }
     },
     {
@@ -123,8 +122,8 @@ let dataSet_order: DataDriven_Order[] = [
             order: "DESC"
         },
         response: {
-            responsee_code: positiveresponseeCode,
-            responsee_isOrder: true
+            response_code: positiveresponseCode,
+            response_isOrder: true
         }
     },
     {
@@ -133,27 +132,34 @@ let dataSet_order: DataDriven_Order[] = [
             order: "abc"
         },
         response: {
-            responsee_code: positiveresponseeCode,
-            responsee_isOrder: false
+            response_code: positiveresponseCode,
+            response_isOrder: false
         }
     }
 ]
+
+let dataSet_pictureType : string[] = [
+    "jpg",
+    "png",
+    "gif",
+]
+
 test.describe(`GET: /image/search: Verify endpoint GET: /image/search`, async() => {
     test.skip(`IMGS-000: Verify schema of /image/search`, async() => {
-        let responsee = await SearchImage.getImage()
-        let jsonResp = await responsee.json()
+        let response = await ImageSearch.getImage()
+        let jsonResp = await response.json()
 
         // Verification
-        await verifications.verifyStatusCode(responsee, 200)
-        await verifications.verifyJsonSchema(responsee, ImageSearchSchema)
+        await verifications.verifyStatusCode(response, 200)
+        await verifications.verifyJsonSchema(response, ImageSearchSchema)
     })
     
     test(`IMGS-001: Verify that default apikey gets only 1 result`, async () => {
-        let responsee = await SearchImage.getImage()
-        let jsonResp = await responsee.json()
+        let response = await ImageSearch.getImage()
+        let jsonResp = await response.json()
 
         // Verification
-        await verifications.verifyStatusCode(responsee, 200)
+        await verifications.verifyStatusCode(response, 200)
         await verifications.verifyEqualItem(jsonResp.length, 1)     
     })
 
@@ -163,11 +169,11 @@ test.describe(`GET: /image/search: Verify endpoint GET: /image/search`, async() 
         let headers : object = { [`x-api-key`] : "abcdummy" }
         let queryParam : object = { limit : 10 }
 
-        let responsee = await SearchImage.getImage_APIKey(queryParam, headers)
-        let jsonResp = await responsee.json()
+        let response = await ImageSearch.getImage_APIKey(headers, queryParam)
+        let jsonResp = await response.json()
 
         // Verification
-        await verifications.verifyStatusCode(responsee, 200)
+        await verifications.verifyStatusCode(response, 200)
         await verifications.verifyEqualItem(jsonResp.length, limit_min)  
     })
 
@@ -176,72 +182,77 @@ test.describe(`GET: /image/search: Verify endpoint GET: /image/search`, async() 
         let headers : object = { [`x-api-key`] : await utilServices.getAPIKey() }
         let queryParam : object = { limit : limit_max }
 
-        let responsee = await SearchImage.getImage_APIKey(queryParam, headers)
-        let jsonResp = await responsee.json()
+        let response = await ImageSearch.getImage_APIKey(headers, queryParam)
+        let jsonResp = await response.json()
 
         // Verification
-        await verifications.verifyStatusCode(responsee, 200)
+        await verifications.verifyStatusCode(response, 200)
         await verifications.verifyEqualItem(jsonResp.length, limit_max)  
     })
 
     dataSet_limit.forEach(data => {
-        test(`IMGS-limit-${data.id}: Verify that limit = ${data.request.limit} returns ${data.response.responsee_length} results`, async() => {
+        test(`IMGS-limit-${data.id}: Verify that limit = ${data.request.limit} returns ${data.response.response_length} results`, async() => {
             // Prepare data
             let headers : object = { [`x-api-key`] : await utilServices.getAPIKey() }
             let queryParam : object = { limit : data.request.limit }
 
-            let responsee = await SearchImage.getImage_APIKey(queryParam, headers)
-            let jsonResp = await responsee.json()
+            let response = await ImageSearch.getImage_APIKey(headers, queryParam)
+            let jsonResp = await response.json()
 
             // Verification
-            await verifications.verifyStatusCode(responsee, data.response.responsee_code)
-            await verifications.verifyEqualItem(jsonResp.length, data.response.responsee_length)
+            await verifications.verifyStatusCode(response, data.response.response_code)
+            await verifications.verifyEqualItem(jsonResp.length, data.response.response_length)
         })
     })
 
     dataSet_order.forEach(data => {
-        test(`IMGS-order-${data.id}: Verify that order = ${data.request.order} returns ${data.response.responsee_isOrder ? "sorted" : "not sorted"} results`, async() => {
+        test(`IMGS-order-${data.id}: Verify that order = ${data.request.order} returns ${data.response.response_isOrder ? "sorted" : "not sorted"} results`, async() => {
             // Prepare data
             let headers : object = { [`x-api-key`] : await utilServices.getAPIKey() }
             let queryParam : object = { limit : 20 , order : data.request.order }
 
-            let responsee = await SearchImage.getImage_APIKey(queryParam, headers)
-            let jsonResp = await responsee.json()
+            let response = await ImageSearch.getImage_APIKey(headers, queryParam)
+            let jsonResp = await response.json()
 
             let id_result : string[] = []
             jsonResp.forEach(item => {
                 id_result.push(item.id)
             })
 
+            console.log(id_result)
+
             // Verification
-            await verifications.verifyStatusCode(responsee, data.response.responsee_code)
+            await verifications.verifyStatusCode(response, data.response.response_code)
             await verifications.verifyEqualItem(jsonResp.length, 20)
-            await verifications.verifyElementIsSorted(id_result, data.request.order)
+
+            let isSorted = (await utilServices.sortArray(id_result, data.request.order) == id_result)? true : false
+            console.log(await id_result)
+            console.log(await utilServices.sortArray(id_result, data.request.order))
+            await verifications.verifyEqualItem(isSorted, data.response.response_isOrder)
         })
     })
 
-    // test(`IMGS-004: Verify that result is not sorted when order = RANDOM`, async() => {
-    //     // Prepare date
-    //     let apiKey = await utilServices.getAPIKey()
+    dataSet_pictureType.forEach(data => {
+        test(`IMGS-pictureType-${data}: Verify that pictureType = ${data} returns ${data} results`, async() => {
+            // Prepare data
+            let headers : object = { [`x-api-key`] : await utilServices.getAPIKey() }
+            let queryParam : object = { limit : 20 , mime_types : data }
 
-    // test(`IMGS-005: Verify that result is sorted when order = ASC`, async() => {
-    //     // Prepare date
-    //     let apiKey = await utilServices.getAPIKey()
-    //     let headers : object = { [`x-api-key`] : apiKey }
-    //     let queryParam : object = { limit : 20 , order : "RANDOM" }
+            let response = await ImageSearch.getImage_APIKey(headers, queryParam)
+            let jsonResp : Type_Image[] = await response.json()
 
-    //     let responsee = await SearchImage.getImage_APIKey(queryParam, headers)
-    //     let jsonResp = await responsee.json()
+            let urlList : string[] = []
+            jsonResp.forEach(item => {
+                urlList.push(item.url)
+            })
+    
+            //Verification
+            await verifications.verifyStatusCode(response, 200)
+            await verifications.verifyEqualItem(jsonResp.length, 20)
 
-    //     let id_result : string[] = []
-    //     await jsonResp.forEach(item => {
-    //         id_result.push(item.id)
-    //     })
-
-    //     // Verification
-    //     await verifications.verifyStatusCode(responsee, 200)
-    //     await verifications.verifyEqualItem(jsonResp.length, 20)
-    //     await verifications.verifyElementIsSorted(id_result, "ASC")
-    //})
-
+            urlList.forEach( async (url : any) => {
+                await verifications.verifyEqualItem(await utilServices.getFileType(url), data, "file type is")
+            })
+        })
+    })
 })

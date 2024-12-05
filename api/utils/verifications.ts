@@ -96,19 +96,27 @@ export class Verifications {
 
         if (order == "ASC") {
             console.log("ASC")
-            for (let index = 1; index < actual.length; index++) {
-                if (actual[index] < actual[index-1]) {
+            for (let index = 0; index < actual.length-1; index++) {
+                if (actual[index].length > actual[index+1]) {
                     result = false
-                    console.log("failed at: ", actual[index])
                     break
+                } else {
+                  result = actual[index] > actual[index+1] ? false : true
                 }
             }
         }
         else if (order == "DESC") {
             console.log("DESC")
-            for (let index = 1; index < actual.length; index++) {
-                if (result = actual[index] > actual[index-1]) {result = false}
-                if (result == false) {break}
+            for (let index = 0; index < actual.length - 1; index++) {
+                if (actual[index].length < actual[index + 1]) {
+                    result = false
+                    break
+                } else {
+                    if (actual[index] < actual[index + 1]) {
+                        result = false
+                        break
+                    }    
+                }
             }
         } else {
             console.log("RANDOM")

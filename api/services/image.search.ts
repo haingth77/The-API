@@ -2,7 +2,7 @@ import apiMethod from "../wrapper/api.method"
 
 const max_limit : number = 100
 
-export class SearchImage {
+export class ImageSearch {
 
     path = `images/search`
 
@@ -12,10 +12,10 @@ export class SearchImage {
         return await response
     }
 
-    public async getImage_APIKey(queryParam: object, headers: object): Promise<any> {
+    public async getImage_APIKey(headers: object, queryParam: object): Promise<any> {
         let response = await apiMethod.GET(this.path, queryParam, headers)
         
         return await response
     }
 
-} export default new SearchImage
+} export default new ImageSearch

@@ -1,5 +1,14 @@
 {
     "compilerOptions": {
-      "alwaysStrict": true
-    }
+      "alwaysStrict": true,
+      "baseUrl": "./",
+      "paths": {
+        "@utils/*": ["api/utils/*"],
+        "@wrapper/*": ["api/wrapper/*"],
+        "@services/*": ["api/services/*"],
+        "@data-driven/*": ["api/data-driven/*"],
+        "@schema/*": ["api/schema/*"],
+    },            
+    },
+         
 } 

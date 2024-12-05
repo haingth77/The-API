@@ -9,12 +9,21 @@
   "license": "ISC",
   "devDependencies": {
     "@playwright/test": "^1.47.2",
-    "@types/node": "^22.7.4"
+    "@types/node": "^22.7.4",
+    "tsconfig-paths": "^4.2.0"
   },
   "dependencies": {
     "dotenv": "^16.4.5",
     "json-schema-library": "^10.0.0-rc2",
     "jsonschema": "^1.4.1",
     "the-api": "file:"
+  },
+  "_moduleAliases": {
+    "@root": ".",
+    "@utils": "api/utils",
+    "@services": "api/services",
+    "@wrapper": "api/wrapper",
+    "@data-driven": "api/data-driven",
+    "@schema": "api/schemas"
   }
 }

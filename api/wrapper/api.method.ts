@@ -7,8 +7,8 @@ export class APIMethod extends BaseApi {
         console.log(headers)
 
         let response = await this.context.get(endpoint, {
-            params: queryParam,
-            headers: headers
+            queryParams: queryParam,
+            headers: headers,
         })
 
         console.log("Response url: ", await response.url())
