@@ -3,16 +3,6 @@ import { Type_Vote } from "@utils/source";
 import Vote from "@services/vote";
 import verifications from "@utils/verifications";
 import utilServices from "@utils/util.services";
-import { json } from "stream/consumers";
-import { request } from "http";
-
-// interface DataDriven_Vote {
-//     request: object
-//     response: {
-//         expected_code: number
-
-//     }
-// }
 
 interface DataDriven_Vote {
     id: number;
